@@ -1,0 +1,7 @@
+
+/* NOTE if submit by return (aka ENTER key) does not work, swap commenting of following lines */
+input[type="submit"] {
+    display: none;
+    /* position: absolute;
+    top: -1000px */
+}
