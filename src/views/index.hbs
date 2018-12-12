@@ -1,10 +1,9 @@
 {{#if error}}
 <h1>Sorry, that doesn't seem to be a valid code.</h1>
 <h1>Check your invitation again.</h1>
-{{else}}
+{{/if}}
 <h1>What is your invitation code?</h1>
 <form action="" method="post">
     <input type="text" name="code"></input>
     <input type="submit" value="Submit">
 </form>
-{{/if}}
