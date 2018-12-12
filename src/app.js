@@ -74,7 +74,8 @@ app.get('/', (req, res) => {
     else {
         // redirect to submission
         // res.redirect('/submission');
-        
+        // ... OR set all values to req.session values to show that they already answered
+        // note cookies vs cache and how to implement state regardless of redirect
     }
 });
 
@@ -101,12 +102,33 @@ app.post('/', (req, res) => {
         res.redirect('/');        
     }
     else if (!req.session.rsvp_num) {
-
+        // set session
+        const {rsvp_num} = req.body;
+        req.session.rsvp_num = rsvp_num;
+        // add new doc to db's submitted collection
+        const sub = new submittedRSVP({
+            code: req.session.rsvp_code,
+            numberAttending: req.session.rsvp_num,
+            submittedAt: Date.now(),
+        });
+        sub.save((err, doc) => {
+            if (err) {
+                res.redirect('/error');
+            }
+            else {
+                res.redirect('/submission');
+            }
+        });
+    }
+    else {
+        res.redirect('/submission');
     }
 });
 
 // successful submission
-app.get('/submission', (req, res) => {});
+app.get('/submission', (req, res) => {
+    res.render('submission');
+});
 
 // error route
 app.get('/error', (req, res) => {
