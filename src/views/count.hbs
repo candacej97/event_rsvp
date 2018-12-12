@@ -1,7 +1,9 @@
+<h1>How many will be attending?</h1>
 <form action="" method="post">
-    <select name="" id="">
-    {{#for maxRSVP+1}}
-        <option value="{{this}}" name="rsvp_num">{{this}}</option>
+    <select name="rsvp_num">
+    {{#for maxRSVP}}
+        <option value="{{this}}" name="">{{this}}</option>
     {{/for}}
     </select>
+    <input type="submit" value="Submit">
 </form>
