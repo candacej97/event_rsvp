@@ -1,5 +1,13 @@
 const mongoose = require('mongoose');
 
+// admin users schema
+const adminUsers = new mongoose.Schema({
+    username: { type: String, unique: true, required: true },
+    password: { type: String, required: true }
+});
+
+mongoose.model('adminUsers', adminUsers);
+
 // rsvp codes schema
 const rsvpCodes = new mongoose.Schema({
     code: { type: String, unique: true, required: true },
