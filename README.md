@@ -12,6 +12,9 @@ Web app "boilerplate" for creating an rsvp site for an event.
     * express
     * mongoose
     * hbs
+    * express-session
+    * express-handlebars
+    * path
 * MongoDB
 
 ## Run Instructions
@@ -30,3 +33,7 @@ go to your browser and go to `localhost:8000`
 ## Deployment
 
 Follow the deployment instructions of your host.
+
+## Acknowledgements
+
+[This handlebars helper function](https://stackoverflow.com/questions/11924452/iterating-over-basic-for-loop-using-handlebars-js) helped me create a the form of how many total rsvp's to count.
