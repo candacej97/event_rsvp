@@ -6,6 +6,33 @@ Web app "boilerplate" for creating an rsvp site for an event.
 * admin panel - create (or add custom) rsvp codes to db
 * ability to use a config file for db security
 
+## Getting Started
+
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+
+### Prerequisites
+
+* Node
+* NPM
+* MongoDB
+
+### Installing
+
+```
+git clone https://github.com/candacej97/event_rsvp.git
+cd event_rsvp
+npm install
+npm start
+```
+
+## Testing
+
+go to your browser and go to `localhost:8000`
+
+## Deployment
+
+Follow the deployment instructions of your host.
+
 ## Built With
 
 * NodeJS
@@ -17,22 +44,9 @@ Web app "boilerplate" for creating an rsvp site for an event.
     * path
 * MongoDB
 
-## Run Instructions
+## License
 
-```
-git clone https://github.com/candacej97/event_rsvp.git
-cd event_rsvp
-npm install
-npm start
-```
-
-### Testing
-
-go to your browser and go to `localhost:8000`
-
-## Deployment
-
-Follow the deployment instructions of your host.
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgements
 
