@@ -56,7 +56,7 @@ app.use((req, res, next) => {
  */
 app.get('/', (req, res) => {    
     // if the rsvp code has NOT been added
-    if (!req.session.rsvp_code) {
+    if (!req.session || !req.session.rsvp_code) {
         // render the main view to get the rsvp code
         res.render('index');
     }
@@ -70,11 +70,14 @@ app.get('/', (req, res) => {
         // render the count view
         res.render('count');
     }
-    // if the rsvp has been completed
+    // if the rsvp has been completed and they are redirected to this route
     else {
-        // redirect to submission
-        // res.redirect('/submission');
-        // ... OR set all values to req.session values to show that they already answered
+        // redirect to submission sending request to resubmit
+        res.redirect('/submission');
+
+        // we can have an edit route that will allow users to edit responses
+
+        // ... AND set all values to req.session values to show that they already answered
         // note cookies vs cache and how to implement state regardless of redirect
     }
 });
@@ -91,7 +94,9 @@ app.post('/', (req, res) => {
                 res.redirect('/');
             }
             else {
-                res.render('index', { error: true });
+                console.log(req.session);
+                const error = err ? true : false;
+                res.render('index', { error: error });
             }
         });
     }
@@ -99,7 +104,13 @@ app.post('/', (req, res) => {
         // set session
         const {rsvp_going} = req.body;
         req.session.rsvp_going = rsvp_going === "Yes" ? true : false;
-        res.redirect('/');        
+        if (req.session.rsvp_going) {
+            res.redirect('/');
+        }
+        else {
+            req.session.submitted = true;
+            res.redirect('/submission');
+        }
     }
     else if (!req.session.rsvp_num) {
         // set session
@@ -116,6 +127,7 @@ app.post('/', (req, res) => {
                 res.redirect('/error');
             }
             else {
+                req.session.submitted = true;
                 res.redirect('/submission');
             }
         });
@@ -127,12 +139,29 @@ app.post('/', (req, res) => {
 
 // successful submission
 app.get('/submission', (req, res) => {
-    res.render('submission');
+    console.log(req.session);
+
+    if (req.session.submitted) {
+        res.render('submission', { attending: req.session.rsvp_going, redirectedFromRoot: req.session.submitted });
+    }
+    else {
+        res.redirect('/');
+    }
 });
 
 // error route
 app.get('/error', (req, res) => {
-    res.send(500);
+    res.send(404, `<p>Lost at sea are we?</p><p>⚓️</p>`);
+});
+
+// edit routes
+app.get('/edit', (req, res) => {
+    // no need to put in rsvp code again
+    // res.render('rsvp');
+});
+
+app.post('/edit', (req, res) => {
+    
 });
 
 // ~~~~~~~~~~~~~   ADMIN ROUTES   ~~~~~~~~~~~~~~
