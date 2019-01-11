@@ -1,7 +1,32 @@
 
+/* import a couple google fonts */
+@import url('https://fonts.googleapis.com/css?family=Staatliches|Thasadith:400,700');
+
 /* NOTE if submit by return (aka ENTER key) does not work, swap commenting of following lines */
 input[type="submit"] {
     display: none;
-    /* position: absolute;
-    top: -1000px */
+}
+
+input[name="rsvp_going"] {
+    /* display: block; */
+    display: unset;
+}
+
+body {
+    text-align: center;
+}
+
+h1 {
+    font-family: 'Staatliches', sans-serif;
+    font-size: 75px;
+}
+
+.error h1 {
+    font-family: 'Staatliches', sans-serif;
+    font-size: 36px;
+    color: #980000;
+}
+
+p, option, input[type='submit'] {
+    font-family: 'Thasadith', sans-serif;
 }
