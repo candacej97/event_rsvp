@@ -1,10 +1,10 @@
 # event_rsvp
-Web app "boilerplate" for creating an rsvp site for an event.
+Web app boilerplate for creating an rsvp site for an event.
 
-## Features
+<!-- ## Features -->
 
-* admin panel - create (or add custom) rsvp codes to db
-* ability to use a config file for db security
+<!-- * admin panel - create (or add custom) rsvp codes to db -->
+<!-- * ability to use a config file for db security -->
 
 ## Getting Started
 
@@ -50,4 +50,5 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgements
 
-[This handlebars helper function](https://stackoverflow.com/questions/11924452/iterating-over-basic-for-loop-using-handlebars-js) helped me create a the form of how many total rsvp's to count.
+* [This handlebars helper function](https://stackoverflow.com/questions/11924452/iterating-over-basic-for-loop-using-handlebars-js) helped me create a the form of how many total rsvp's to count.
+* [This code](https://stackoverflow.com/questions/41423727/handlebars-registerhelper-serverside-with-expressjs) helped me register the handlebars helper function from above for it to work.

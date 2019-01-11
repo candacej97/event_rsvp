@@ -6,14 +6,8 @@ const exphbs = require('express-handlebars');
 require('./db');
 
 const app = express();
-// would we need an auth file
+// would we need an auth file? todo
 // const auth = require('./auth.js');
-
-// Create an instance of the express-handlebars
-const handlebars  = require('./helper.js')(exphbs);
-
-// set template engine
-app.engine('hbs', handlebars.engine);
 
 // enable information
 app.use(session({
@@ -23,6 +17,7 @@ app.use(session({
     cookie: { expires: false }
 }));
 
+// include mongo models
 const rsvpCodes = mongoose.model('rsvpCodes');
 const submittedRSVP = mongoose.model('submittedRSVP');
 
@@ -33,14 +28,23 @@ app.use(express.static(publicPath));
 // change views directory
 app.set('views', path.join(__dirname, 'views'));
 
-// set the view engine to handlebars
-app.set('view engine', 'hbs');
+// set template engine
+app.engine("hbs", exphbs({
+    defaultLayout: "layout",
+    extname: ".hbs",
+    helpers: require("./helper").helpers, // same file that gets used on our client
+    partialsDir: "src/views/partials/", // default is views/partials but because we are serving the app from the src/public dir we have to include it
+    layoutsDir: "src/views/layouts/" 
+  }));
 
-// serving the app from the public folder
+// set the view engine to handlebars
+app.set("view engine", "hbs");
+
+// serving the app from the public dir
 // app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: false }));
 
-// have the app find out if the current user is signed in
+// have the app find out if the current user is signed in fixme
 app.use((req, res, next) => {
     res.locals.maxRSVP = req.session.maxRSVP;
     next();
@@ -74,11 +78,6 @@ app.get('/', (req, res) => {
     else {
         // redirect to submission sending request to resubmit
         res.redirect('/submission');
-
-        // we can have an edit route that will allow users to edit responses
-
-        // ... AND set all values to req.session values to show that they already answered
-        // note cookies vs cache and how to implement state regardless of redirect
     }
 });
 
@@ -91,32 +90,43 @@ app.post('/', (req, res) => {
                 console.log(doc);
                 req.session.rsvp_code = code;
                 req.session.maxRSVP = doc.maxRSVP;
+
+                // set cookies
+                res.cookie('rsvp_code', code, {'expires': new Date(Date.now() + 900000)});
+                res.cookie('maxRSVP', doc.maxRSVP, {'expires': new Date(Date.now() + 900000)});
+
                 res.redirect('/');
             }
             else {
-                console.log(req.session);
+                console.log(`req (line 98)\n ${res.cookie}`);
                 const error = err ? true : false;
                 res.render('index', { error: error });
             }
         });
     }
     else if (!req.session.rsvp_going) {
-        // set session
+        // set session + cookies
         const {rsvp_going} = req.body;
         req.session.rsvp_going = rsvp_going === "Yes" ? true : false;
+        res.cookie('rsvp_going', rsvp_going === "Yes" ? true : false, {'expires': new Date(Date.now() + 900000)});
+
         if (req.session.rsvp_going) {
             res.redirect('/');
         }
         else {
             req.session.submitted = true;
+            res.cookie('submitted', true, {'expires': new Date(Date.now() + 900000)});
+
             res.redirect('/submission');
         }
     }
     else if (!req.session.rsvp_num) {
-        // set session
+        // set session + cookies
         const {rsvp_num} = req.body;
         req.session.rsvp_num = rsvp_num;
-        // add new doc to db's submitted collection
+        res.cookie('rsvp_num', rsvp_num, {'expires': new Date(Date.now() + 900000)});
+
+        // add new doc to db's submitted collection + todo use existing cookies or session data
         const sub = new submittedRSVP({
             code: req.session.rsvp_code,
             numberAttending: req.session.rsvp_num,
@@ -128,6 +138,8 @@ app.post('/', (req, res) => {
             }
             else {
                 req.session.submitted = true;
+                res.cookie('submitted', true, {'expires': new Date(Date.now() + 900000)});
+
                 res.redirect('/submission');
             }
         });
@@ -139,7 +151,7 @@ app.post('/', (req, res) => {
 
 // successful submission
 app.get('/submission', (req, res) => {
-    console.log(req.session);
+    console.log(`req (line 151)\n ${res.cookie}`);
 
     if (req.session.submitted) {
         res.render('submission', { attending: req.session.rsvp_going, redirectedFromRoot: req.session.submitted });
@@ -151,12 +163,17 @@ app.get('/submission', (req, res) => {
 
 // error route
 app.get('/error', (req, res) => {
-    res.send(404, `<p>Lost at sea are we?</p><p>⚓️</p>`);
+    res.status(404).send(`<p>Lost at sea are we? ⚓️</️p>`).setTimeout(300, () => res.redirect('/')); 
 });
 
-// edit routes
+
+// edit routes that will allow users to edit responses
 app.get('/edit', (req, res) => {
-    // no need to put in rsvp code again
+    // todo
+    
+    // feat: no need to put in rsvp code again
+    // ... AND set all values to req.session values to show that they already answered
+
     // res.render('rsvp');
 });
 
@@ -166,17 +183,31 @@ app.post('/edit', (req, res) => {
 
 // ~~~~~~~~~~~~~   ADMIN ROUTES   ~~~~~~~~~~~~~~
 
-app.get('/admlogin', (req, res) => {});
+// add an admin user through your mongoDB instance before deployment
 
-app.post('/admlogin', (req, res) => {});
+// these routes are not meant to implement signing up a new admin, otherwise everyone could be an admin 
 
-app.get('/admin', (req, res) => {});
+app.get('/admin', (req, res) => {
+    /**
+     * todo
+     * 
+     * show a list of the invitations
+     * show a key of (black - invited, green - rsvp yes, red - rsvp no)
+     * show a button that links to editing invite list
+     * feat: download a pdf (or excel) version of the data
+     * 
+     */
+});
 
-app.get('/admin/add', (req, res) => {});
-
-app.post('/admin/add', (req, res) => {});
-
-app.get('/admin/edit', (req, res) => {});
+app.get('/admin/edit', (req, res) => {
+    /**
+     * todo
+     * 
+     * add list of invitations (namesOnInvite, maxRSVP, code)
+     * show a link to randomly generate an invitation code to each person
+     * feat: delete (or archive) multiple or single amount of invitations
+     */
+});
 
 app.post('/admin/edit', (req, res) => {});
 

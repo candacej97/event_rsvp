@@ -1,18 +1,28 @@
-function hbsHelpers(hbs) {
-    return hbs.create({
-      helpers: {
-        // helper function to mimic normal for-loop (looping a certain amount of times)
-        for: function(n, block) {
-          let accum = '';
-          for (let i = 1; i < n+1; ++i)
-              accum += block.fn(i);
-          return accum;
-        }
-  
-        // add more helpers...
-      }
-  
-    });
+
+const register = function(Handlebars) {
+  const helpers = {
+    // put all of your helpers inside this object
+    for: function(n, block) {
+      let accum = '';
+      for (let i = 1; i < n+1; ++i)
+          accum += block.fn(i);
+      return accum;
+    }
+  };
+
+  if (Handlebars && typeof Handlebars.registerHelper === "function") {
+    // register helpers
+    for (const prop in helpers) {
+        Handlebars.registerHelper(prop, helpers[prop]);
+    }
+  } else {
+      // just return helpers object if we can't register helpers here
+      return helpers;
   }
-  
-  module.exports = hbsHelpers;
+
+};
+
+module.exports.register = register;
+module.exports.helpers = register(null);  
+
+// code from https://stackoverflow.com/questions/41423727/handlebars-registerhelper-serverside-with-expressjs
