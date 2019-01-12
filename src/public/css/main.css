@@ -30,3 +30,34 @@ h1 {
 p, option, input[type='submit'] {
     font-family: 'Thasadith', sans-serif;
 }
+
+p {
+    font-size: 36px;
+}
+
+input[type="text"], input[name="rsvp_going"], select {
+    max-height: 125px;
+    height: 50px;
+    width: 400px;
+    max-width: 450px;
+    border: black 2px solid;
+    background: #E8E8E8;
+    font-size: 2rem;
+    text-align: center;
+    font-family: 'Thasadith', sans-serif;
+}
+
+input[name="rsvp_going"] {
+    width: 100px;
+    max-width: 125px;
+    cursor: pointer;
+}
+
+input[name="rsvp_going"]:hover, input[name="rsvp_going"]:focus {
+    background: #c05151;
+}
+
+select {
+    width: 100px;
+    max-width: 125px;
+}

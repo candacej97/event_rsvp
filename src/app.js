@@ -98,7 +98,6 @@ app.post('/', (req, res) => {
                 res.redirect('/');
             }
             else {
-                console.log(`req (line 98)\n ${res.cookie}`);
                 const error = err ? true : false;
                 res.render('index', { error: error });
             }
@@ -126,23 +125,30 @@ app.post('/', (req, res) => {
         req.session.rsvp_num = rsvp_num;
         res.cookie('rsvp_num', rsvp_num, {'expires': new Date(Date.now() + 900000)});
 
-        // add new doc to db's submitted collection + todo use existing cookies or session data
-        const sub = new submittedRSVP({
-            code: req.session.rsvp_code,
-            numberAttending: req.session.rsvp_num,
-            submittedAt: Date.now(),
-        });
-        sub.save((err, doc) => {
-            if (err) {
-                res.redirect('/error');
-            }
-            else {
-                req.session.submitted = true;
-                res.cookie('submitted', true, {'expires': new Date(Date.now() + 900000)});
+        // add new doc to db's submitted collection + use session data
+        rsvpCodes.findOne({ code: req.session.rsvp_code }, function(err, doc){
 
-                res.redirect('/submission');
-            }
+            const sub = new submittedRSVP({
+                rsvpCode: mongoose.Types.ObjectId(doc._id),
+                numberAttending: req.session.rsvp_num,
+                submittedAt: Date.now()
+            });
+            sub.save(function(err) {
+                if (err) {
+                    console.log(`error on saving new submittedRSVP => ${err}`);
+                    
+                    res.redirect('/error');
+                }
+                else {
+                    req.session.submitted = true;
+                    res.cookie('submitted', true, {'expires': new Date(Date.now() + 900000)});
+    
+                    res.redirect('/submission');
+                }
+            });
+    
         });
+
     }
     else {
         res.redirect('/submission');
@@ -151,10 +157,9 @@ app.post('/', (req, res) => {
 
 // successful submission
 app.get('/submission', (req, res) => {
-    console.log(`req (line 151)\n ${res.cookie}`);
 
     if (req.session.submitted) {
-        res.render('submission', { attending: req.session.rsvp_going, redirectedFromRoot: req.session.submitted });
+        res.render('submission', { attending: req.session.rsvp_going, redirectedFromRoot: false });
     }
     else {
         res.redirect('/');
@@ -163,7 +168,7 @@ app.get('/submission', (req, res) => {
 
 // error route
 app.get('/error', (req, res) => {
-    res.status(404).send(`<p>Lost at sea are we? ⚓️</️p>`).setTimeout(300, () => res.redirect('/')); 
+    res.render('error');
 });
 
 
@@ -171,6 +176,8 @@ app.get('/error', (req, res) => {
 app.get('/edit', (req, res) => {
     // todo
     
+    // use existing cookies
+
     // feat: no need to put in rsvp code again
     // ... AND set all values to req.session values to show that they already answered
 
