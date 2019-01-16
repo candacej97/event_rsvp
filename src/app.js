@@ -44,7 +44,7 @@ app.use(express.urlencoded({ extended: false }));
 
 // have the app find out if the current user is signed in fixme
 app.use((req, res, next) => {
-    res.locals.maxRSVP = req.session.maxRSVP;
+    // res.locals.maxRSVP = req.session.maxRSVP;
     next();
 });
 
