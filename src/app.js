@@ -177,7 +177,7 @@ app.post('/', (req, res) => {
 app.get('/submission', (req, res) => {
 
     if (req.session.submitted) {
-        res.render('submission', { attending: req.session.rsvp_going, redirectedFromRoot: false });
+        res.render('submission', { attending: req.session.rsvp_going, edited: req.session.edited });
     }
     else {
         res.redirect('/');
@@ -224,10 +224,22 @@ app.get('/edit/:code', (req, res) => {
 });
 
 app.post('/edit/:code', (req, res) => {
-    // todo
+    // feat/: handle editing a previously submitted rsvp
 
-    // feat/: handle entering an rsvp code that has already rsvp'd
-    // -> Ask to edit
+    const {rsvp_going, rsvp_num} = req.body;
+    rsvpCodes.findOne({code:req.params.code}, (err, doc) => {
+        if (!err) {
+            submittedRSVP.findOneAndUpdate({code:doc._id}, {numberAttending: rsvp_going === "Yes" ? rsvp_num : 0, editedAt: new Date.now()}, (err, doc) => {
+                if (!err) {
+                    req.session.edited = true;
+                    res.redirect('/submission');
+                } else {
+                // if there's an error saving the edited rsvp
+                    res.redirect('/error');
+                }
+            })
+        }
+    });
 });
 
 // ~~~~~~~~~~~~~   ADMIN ROUTES   ~~~~~~~~~~~~~~

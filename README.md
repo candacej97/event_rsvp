@@ -29,10 +29,6 @@ npm start
 
 go to your browser and go to `localhost:8000`
 
-## Deployment
-
-Follow the deployment instructions of your host.
-
 ## Built With
 
 * NodeJS
