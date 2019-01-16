@@ -1,0 +1,28 @@
+<h1>You have already RSVP'ed</h1>
+<div>
+    <h3>RSVP Code: <span>{{rsvp_code}}</span></h3>
+    <form action="" method="post">
+        {{#if rsvp_going}}
+            <input class="clicked" type="button" value="Attending" name="rsvp_going">
+            <input type="button" value="Not Attending" name="rsvp_going">
+            <select name="rsvp_num">
+            {{#for maxRSVP}}
+                <option value="{{this}}" name="">{{this}}</option>
+            {{/for}}
+            </select>
+
+        {{else}}
+            <input type="button" value="Attending" name="rsvp_going">
+            <input class="clicked" type="button" value="Not Attending" name="rsvp_going">  
+            <select name="rsvp_num" disabled aria-disabled="true">
+            {{#for maxRSVP}}
+                <option value="{{this}}" name="">{{this}}</option>
+            {{/for}}
+            </select>
+        {{/if}}
+
+        <input style="display: unset;" type="submit" value="Submit">
+    </form>
+</div>
+
+{{!-- todo add script for the switch of .clicked class --}}
