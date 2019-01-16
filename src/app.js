@@ -221,13 +221,13 @@ app.post('/edit', (req, res) => {
     let {rsvp_going, rsvp_num} = req.body;
     rsvp_going = rsvp_num ? true : false;
     
-    // fixme the redirect is not happening for some reason
     rsvpCodes.findOne({code:req.session.rsvp_code}, (err, doc) => {
         if (!err) {
             submittedRSVP.findOneAndUpdate({rsvpCode:doc._id}, {numberAttending: rsvp_num || 0, editedAt: Date.now()}, (err, doc) => {
                 if (!err) {
                     req.session.edited = true;
-                    res.redirect(301, '/submission');
+                    req.session.submitted = true;
+                    res.redirect('/submission');
                 } else {
                 // if there's an error saving the edited rsvp
                     res.redirect('/error');
@@ -238,8 +238,8 @@ app.post('/edit', (req, res) => {
             // if the code could not be found in the db while saving new data
             res.redirect('/error');
         }
-        // res.redirect(301, '/submission');
     });
+    
 });
 
 // ~~~~~~~~~~~~~   ADMIN ROUTES   ~~~~~~~~~~~~~~
