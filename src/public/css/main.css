@@ -1,9 +1,9 @@
 
-/* import a couple google fonts */
 @import url('https://fonts.googleapis.com/css?family=Staatliches|Thasadith:400,700');
 
 /* NOTE if submit by return (aka ENTER key) does not work, swap commenting of following lines */
 input[type="submit"] {
+    cursor: pointer;
     display: none;
 }
 
@@ -18,12 +18,17 @@ body {
 
 h1 {
     font-family: 'Staatliches', sans-serif;
-    font-size: 75px;
+    font-size: 5rem;
+}
+
+h3 {
+    font-family: 'Staatliches', sans-serif;
+    font-size: 2rem;
 }
 
 .error h1 {
     font-family: 'Staatliches', sans-serif;
-    font-size: 36px;
+    font-size: 2rem;
     color: #980000;
 }
 
@@ -32,14 +37,14 @@ p, option, input[type='submit'] {
 }
 
 p {
-    font-size: 36px;
+    font-size: 1.75rem;
 }
 
-input[type="text"], input[name="rsvp_going"], select {
+input[type="text"], input[name="rsvp_going"], input[value="Submit"], select {
     max-height: 125px;
     height: 50px;
-    width: 400px;
-    max-width: 450px;
+    min-width: 100px;
+    max-width: max-content;
     border: black 2px solid;
     background: #E8E8E8;
     font-size: 2rem;
@@ -48,16 +53,23 @@ input[type="text"], input[name="rsvp_going"], select {
 }
 
 input[name="rsvp_going"] {
-    width: 100px;
-    max-width: 125px;
     cursor: pointer;
 }
 
-input[name="rsvp_going"]:hover, input[name="rsvp_going"]:focus {
+input[name="rsvp_going"]:hover, input[name="rsvp_going"]:focus, input[name="rsvp_going"].clicked:hover, input[name="rsvp_going"].clicked:focus, input[value="Submit"]:hover, input[value="Submit"]:focus {
     background: #c05151;
 }
 
 select {
-    width: 100px;
+    min-width: 60px;
     max-width: 125px;
+}
+
+input[name="rsvp_going"].clicked {
+    background-color: #980000;
+}
+
+select[disabled='true'] {
+    background: whitesmoke;
+    color: #E8E8E8;
 }

@@ -22,8 +22,7 @@ const rsvpCodes = mongoose.model('rsvpCodes');
 const submittedRSVP = mongoose.model('submittedRSVP');
 
 // serve static files
-const publicPath = path.resolve(__dirname, 'public');
-app.use(express.static(publicPath));
+app.use(express.static(path.resolve(__dirname, 'public')));
 
 // change views directory
 app.set('views', path.join(__dirname, 'views'));
@@ -41,28 +40,29 @@ app.engine("hbs", exphbs({
 app.set("view engine", "hbs");
 
 // serving the app from the public dir
-// app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: false }));
 
 // have the app find out if the current user is signed in fixme
 app.use((req, res, next) => {
-    res.locals.maxRSVP = req.session.maxRSVP;
+    // res.locals.maxRSVP = req.session.maxRSVP;
     next();
 });
 
+
 // ~~~~~~~~~~~~~   ROUTES   ~~~~~~~~~~~~~~
 
-/**
- * session should be this by the end of the 'loop'
- *  rsvp code
- *  rsvpgoing
- *  rsvpnumber
- */
-app.get('/', (req, res) => {    
+app.get('/', (req, res) => {        
     // if the rsvp code has NOT been added
     if (!req.session || !req.session.rsvp_code) {
+        // reset all session information
+        req.session.destroy();
         // render the main view to get the rsvp code
         res.render('index');
+    }
+    else if (req.session.rsvp_code) {
+        submittedRSVP.findOne({code:req.session.rsvp_code}, (err, doc) => {
+            res.redirect('/edit');
+        });
     }
     // if the user has not answered yes or no
     else if (!req.session.rsvp_going) {
@@ -84,22 +84,33 @@ app.get('/', (req, res) => {
 app.post('/', (req, res) => {
     if (!req.session.rsvp_code) {
         const {code} = req.body;
-        rsvpCodes.findOne({ code: code }, (err, doc) => {
-            // if the doc is found redirect
+        submittedRSVP.findOne({ code: code }, (err, doc) => {
             if (doc) {
-                console.log(doc);
+                console.log(`code has been submitted already`);
+                
                 req.session.rsvp_code = code;
-                req.session.maxRSVP = doc.maxRSVP;
-
-                // set cookies
                 res.cookie('rsvp_code', code, {'expires': new Date(Date.now() + 900000)});
-                res.cookie('maxRSVP', doc.maxRSVP, {'expires': new Date(Date.now() + 900000)});
 
-                res.redirect('/');
-            }
-            else {
-                const error = err ? true : false;
-                res.render('index', { error: error });
+                res.redirect('/edit');
+            } else {
+                rsvpCodes.findOne({ code: code }, (err, doc) => {
+                    // if the doc is found redirect
+                    if (doc) {
+                        console.log(doc);
+                        req.session.rsvp_code = code;
+                        req.session.maxRSVP = doc.maxRSVP;
+        
+                        // set cookies
+                        res.cookie('rsvp_code', code, {'expires': new Date(Date.now() + 900000)});
+                        res.cookie('maxRSVP', doc.maxRSVP, {'expires': new Date(Date.now() + 900000)});
+        
+                        res.redirect('/');
+                    }
+                    else {
+                        const error = err ? true : false;
+                        res.render('index', { error: error });
+                    }
+                });        
             }
         });
     }
@@ -115,6 +126,20 @@ app.post('/', (req, res) => {
         else {
             req.session.submitted = true;
             res.cookie('submitted', true, {'expires': new Date(Date.now() + 900000)});
+
+            const sub = new submittedRSVP({
+                rsvpCode: mongoose.Types.ObjectId(doc._id),
+                numberAttending: 0,
+                submittedAt: Date.now()
+            });
+            sub.save(function(err) {
+                if (err) {                    
+                    res.redirect('/error');
+                }
+                else {    
+                    res.redirect('/submission');
+                }
+            });
 
             res.redirect('/submission');
         }
@@ -134,9 +159,7 @@ app.post('/', (req, res) => {
                 submittedAt: Date.now()
             });
             sub.save(function(err) {
-                if (err) {
-                    console.log(`error on saving new submittedRSVP => ${err}`);
-                    
+                if (err) {                    
                     res.redirect('/error');
                 }
                 else {
@@ -146,9 +169,7 @@ app.post('/', (req, res) => {
                     res.redirect('/submission');
                 }
             });
-    
         });
-
     }
     else {
         res.redirect('/submission');
@@ -159,7 +180,7 @@ app.post('/', (req, res) => {
 app.get('/submission', (req, res) => {
 
     if (req.session.submitted) {
-        res.render('submission', { attending: req.session.rsvp_going, redirectedFromRoot: false });
+        res.render('submission', { attending: req.session.rsvp_going, edited: req.session.edited });
     }
     else {
         res.redirect('/');
@@ -171,20 +192,52 @@ app.get('/error', (req, res) => {
     res.render('error');
 });
 
+// ~~~~~~~~~~~~~   EDIT ROUTES   ~~~~~~~~~~~~~~
 
-// edit routes that will allow users to edit responses
 app.get('/edit', (req, res) => {
-    // todo
-    
-    // use existing cookies
+    let maxrsvp = 0;
 
-    // feat: no need to put in rsvp code again
-    // ... AND set all values to req.session values to show that they already answered
+    rsvpCodes.findOne({code:req.session.rsvp_code}, (err, doc) => {
+        if (!err) {
+            maxrsvp = doc.maxRSVP;
 
-    // res.render('rsvp');
+            submittedRSVP.findOne({rsvpCode:doc._id}, (err, doc) => {
+                if (!err) {                    
+                    res.render('edit', {rsvp_code: req.session.rsvp_code, rsvp_going: doc.numberAttending > 0 ? true : false, maxRSVP: maxrsvp, rsvpedFor: doc.numberAttending});    
+
+                } else {
+                    res.redirect('/');
+                }
+            });        
+        } else {
+            res.redirect('/');
+        }
+    });
 });
 
+// feat/: handle editing a previously submitted rsvp
 app.post('/edit', (req, res) => {
+    let {rsvp_going, rsvp_num} = req.body;
+    rsvp_going = rsvp_num ? true : false;
+    
+    rsvpCodes.findOne({code:req.session.rsvp_code}, (err, doc) => {
+        if (!err) {
+            submittedRSVP.findOneAndUpdate({rsvpCode:doc._id}, {numberAttending: rsvp_num || 0, editedAt: Date.now()}, (err, doc) => {
+                if (!err) {
+                    req.session.edited = true;
+                    req.session.submitted = true;
+                    res.redirect('/submission');
+                } else {
+                // if there's an error saving the edited rsvp
+                    res.redirect('/error');
+                }
+            });
+
+        } else {
+            // if the code could not be found in the db while saving new data
+            res.redirect('/error');
+        }
+    });
     
 });
 

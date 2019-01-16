@@ -7,6 +7,13 @@ const register = function(Handlebars) {
       for (let i = 1; i < n+1; ++i)
           accum += block.fn(i);
       return accum;
+    },
+    ifEq: function(x, options) {
+      const rsvpedFor = options.data.root.rsvpedFor;
+
+      if(this == rsvpedFor) {
+        return `selected="true"`;
+      }
     }
   };
 
