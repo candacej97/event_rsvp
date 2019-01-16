@@ -22,8 +22,7 @@ const rsvpCodes = mongoose.model('rsvpCodes');
 const submittedRSVP = mongoose.model('submittedRSVP');
 
 // serve static files
-const publicPath = path.resolve(__dirname, 'public');
-app.use(express.static(publicPath));
+app.use(express.static(path.resolve(__dirname, 'public')));
 
 // change views directory
 app.set('views', path.join(__dirname, 'views'));
@@ -41,7 +40,6 @@ app.engine("hbs", exphbs({
 app.set("view engine", "hbs");
 
 // serving the app from the public dir
-// app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: false }));
 
 // have the app find out if the current user is signed in fixme
@@ -52,17 +50,16 @@ app.use((req, res, next) => {
 
 // ~~~~~~~~~~~~~   ROUTES   ~~~~~~~~~~~~~~
 
-/**
- * session should be this by the end of the 'loop'
- *  rsvp code
- *  rsvpgoing
- *  rsvpnumber
- */
-app.get('/', (req, res) => {    
+app.get('/', (req, res) => {        
     // if the rsvp code has NOT been added
     if (!req.session || !req.session.rsvp_code) {
         // render the main view to get the rsvp code
         res.render('index');
+    }
+    else if (req.session.rsvp_code) {
+        submittedRSVP.findOne({code:req.session.rsvp_code}, (err, doc) => {
+            res.redirect('/edit');
+        });
     }
     // if the user has not answered yes or no
     else if (!req.session.rsvp_going) {
@@ -84,22 +81,33 @@ app.get('/', (req, res) => {
 app.post('/', (req, res) => {
     if (!req.session.rsvp_code) {
         const {code} = req.body;
-        rsvpCodes.findOne({ code: code }, (err, doc) => {
-            // if the doc is found redirect
+        submittedRSVP.findOne({ code: code }, (err, doc) => {
             if (doc) {
-                console.log(doc);
+                console.log(`code has been submitted already`);
+                
                 req.session.rsvp_code = code;
-                req.session.maxRSVP = doc.maxRSVP;
-
-                // set cookies
                 res.cookie('rsvp_code', code, {'expires': new Date(Date.now() + 900000)});
-                res.cookie('maxRSVP', doc.maxRSVP, {'expires': new Date(Date.now() + 900000)});
 
-                res.redirect('/');
-            }
-            else {
-                const error = err ? true : false;
-                res.render('index', { error: error });
+                res.redirect('/edit');
+            } else {
+                rsvpCodes.findOne({ code: code }, (err, doc) => {
+                    // if the doc is found redirect
+                    if (doc) {
+                        console.log(doc);
+                        req.session.rsvp_code = code;
+                        req.session.maxRSVP = doc.maxRSVP;
+        
+                        // set cookies
+                        res.cookie('rsvp_code', code, {'expires': new Date(Date.now() + 900000)});
+                        res.cookie('maxRSVP', doc.maxRSVP, {'expires': new Date(Date.now() + 900000)});
+        
+                        res.redirect('/');
+                    }
+                    else {
+                        const error = err ? true : false;
+                        res.render('index', { error: error });
+                    }
+                });        
             }
         });
     }
@@ -115,6 +123,20 @@ app.post('/', (req, res) => {
         else {
             req.session.submitted = true;
             res.cookie('submitted', true, {'expires': new Date(Date.now() + 900000)});
+
+            const sub = new submittedRSVP({
+                rsvpCode: mongoose.Types.ObjectId(doc._id),
+                numberAttending: 0,
+                submittedAt: Date.now()
+            });
+            sub.save(function(err) {
+                if (err) {                    
+                    res.redirect('/error');
+                }
+                else {    
+                    res.redirect('/submission');
+                }
+            });
 
             res.redirect('/submission');
         }
@@ -134,9 +156,7 @@ app.post('/', (req, res) => {
                 submittedAt: Date.now()
             });
             sub.save(function(err) {
-                if (err) {
-                    console.log(`error on saving new submittedRSVP => ${err}`);
-                    
+                if (err) {                    
                     res.redirect('/error');
                 }
                 else {
@@ -146,9 +166,7 @@ app.post('/', (req, res) => {
                     res.redirect('/submission');
                 }
             });
-    
         });
-
     }
     else {
         res.redirect('/submission');
@@ -171,21 +189,45 @@ app.get('/error', (req, res) => {
     res.render('error');
 });
 
+// ~~~~~~~~~~~~~   EDIT ROUTES   ~~~~~~~~~~~~~~
 
-// edit routes that will allow users to edit responses
+// fixme change the routes to not include the code in the path
+
 app.get('/edit', (req, res) => {
-    // todo
-    
-    // use existing cookies
-
-    // feat: no need to put in rsvp code again
-    // ... AND set all values to req.session values to show that they already answered
-
-    // res.render('rsvp');
+    if (req.session.rsvp_code) {        
+        res.redirect(`/edit/${req.session.rsvp_code}`);
+    } else {
+        res.redirect('/');
+    }
 });
 
-app.post('/edit', (req, res) => {
+app.get('/edit/:code', (req, res) => {
     
+    let maxrsvp = 0;
+
+    rsvpCodes.findOne({code:req.params.code}, (err, doc) => {
+        if (!err) {
+            maxrsvp = doc.maxRSVP;
+
+            submittedRSVP.findOne({rsvpCode:doc._id}, (err, doc) => {
+                if (!err) {                    
+                    res.render('edit', {rsvp_code: req.params.code, rsvp_going: doc.numberAttending > 0 ? true : false, maxRSVP: maxrsvp});    
+
+                } else {
+                    res.redirect('/');
+                }
+            });        
+        } else {
+            res.redirect('/');
+        }
+    });
+});
+
+app.post('/edit/:code', (req, res) => {
+    // todo
+
+    // feat/: handle entering an rsvp code that has already rsvp'd
+    // -> Ask to edit
 });
 
 // ~~~~~~~~~~~~~   ADMIN ROUTES   ~~~~~~~~~~~~~~
