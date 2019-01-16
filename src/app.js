@@ -48,11 +48,14 @@ app.use((req, res, next) => {
     next();
 });
 
+
 // ~~~~~~~~~~~~~   ROUTES   ~~~~~~~~~~~~~~
 
 app.get('/', (req, res) => {        
     // if the rsvp code has NOT been added
     if (!req.session || !req.session.rsvp_code) {
+        // reset all session information
+        req.session.destroy();
         // render the main view to get the rsvp code
         res.render('index');
     }
