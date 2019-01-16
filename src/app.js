@@ -226,21 +226,27 @@ app.get('/edit/:code', (req, res) => {
     });
 });
 
+// feat/: handle editing a previously submitted rsvp
 app.post('/edit/:code', (req, res) => {
-    // feat/: handle editing a previously submitted rsvp
-
-    const {rsvp_going, rsvp_num} = req.body;
+    let {rsvp_going, rsvp_num} = req.body;
+    rsvp_going = rsvp_num ? true : false;
+    
+    // todo check if submitted db is actually changing
+    // fixme the redirect is not happening for some reason
     rsvpCodes.findOne({code:req.params.code}, (err, doc) => {
         if (!err) {
-            submittedRSVP.findOneAndUpdate({code:doc._id}, {numberAttending: rsvp_going === "Yes" ? rsvp_num : 0, editedAt: new Date.now()}, (err, doc) => {
+            submittedRSVP.findOneAndUpdate({code:doc._id}, {numberAttending: rsvp_num || 0, editedAt: Date.now()}, (err, doc) => {
                 if (!err) {
-                    req.session.edited = true;
+                    req.session.edited = true;                    
                     res.redirect('/submission');
                 } else {
                 // if there's an error saving the edited rsvp
                     res.redirect('/error');
                 }
             })
+        } else {
+            // if the code could not be found in the db while saving new data
+            res.redirect('/error');
         }
     });
 });

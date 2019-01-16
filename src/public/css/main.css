@@ -3,6 +3,7 @@
 
 /* NOTE if submit by return (aka ENTER key) does not work, swap commenting of following lines */
 input[type="submit"] {
+    cursor: pointer;
     display: none;
 }
 
@@ -55,7 +56,7 @@ input[name="rsvp_going"] {
     cursor: pointer;
 }
 
-input[name="rsvp_going"]:hover, input[name="rsvp_going"]:focus, input[name="rsvp_going"].clicked:hover, input[name="rsvp_going"].clicked:focus {
+input[name="rsvp_going"]:hover, input[name="rsvp_going"]:focus, input[name="rsvp_going"].clicked:hover, input[name="rsvp_going"].clicked:focus, input[value="Submit"]:hover, input[value="Submit"]:focus {
     background: #c05151;
 }
 
@@ -66,4 +67,9 @@ select {
 
 input[name="rsvp_going"].clicked {
     background-color: #980000;
+}
+
+select[disabled='true'] {
+    background: whitesmoke;
+    color: #E8E8E8;
 }
