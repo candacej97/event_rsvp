@@ -194,27 +194,17 @@ app.get('/error', (req, res) => {
 
 // ~~~~~~~~~~~~~   EDIT ROUTES   ~~~~~~~~~~~~~~
 
-// fixme change the routes to not include the code in the path
-
 app.get('/edit', (req, res) => {
-    if (req.session.rsvp_code) {        
-        res.redirect(`/edit/${req.session.rsvp_code}`);
-    } else {
-        res.redirect('/');
-    }
-});
-
-app.get('/edit/:code', (req, res) => {
     
     let maxrsvp = 0;
 
-    rsvpCodes.findOne({code:req.params.code}, (err, doc) => {
+    rsvpCodes.findOne({code:req.session.rsvp_code}, (err, doc) => {
         if (!err) {
             maxrsvp = doc.maxRSVP;
 
             submittedRSVP.findOne({rsvpCode:doc._id}, (err, doc) => {
                 if (!err) {                    
-                    res.render('edit', {rsvp_code: req.params.code, rsvp_going: doc.numberAttending > 0 ? true : false, maxRSVP: maxrsvp});    
+                    res.render('edit', {rsvp_code: req.session.rsvp_code, rsvp_going: doc.numberAttending > 0 ? true : false, maxRSVP: maxrsvp});    
 
                 } else {
                     res.redirect('/');
@@ -227,26 +217,28 @@ app.get('/edit/:code', (req, res) => {
 });
 
 // feat/: handle editing a previously submitted rsvp
-app.post('/edit/:code', (req, res) => {
+app.post('/edit', (req, res) => {
     let {rsvp_going, rsvp_num} = req.body;
     rsvp_going = rsvp_num ? true : false;
     
     // fixme the redirect is not happening for some reason
-    rsvpCodes.findOne({code:req.params.code}, (err, doc) => {
+    rsvpCodes.findOne({code:req.session.rsvp_code}, (err, doc) => {
         if (!err) {
             submittedRSVP.findOneAndUpdate({rsvpCode:doc._id}, {numberAttending: rsvp_num || 0, editedAt: Date.now()}, (err, doc) => {
                 if (!err) {
-                    req.session.edited = true;                    
-                    res.redirect('/submission');
+                    req.session.edited = true;
+                    res.redirect(301, '/submission');
                 } else {
                 // if there's an error saving the edited rsvp
                     res.redirect('/error');
                 }
-            })
+            });
+
         } else {
             // if the code could not be found in the db while saving new data
             res.redirect('/error');
         }
+        // res.redirect(301, '/submission');
     });
 });
 

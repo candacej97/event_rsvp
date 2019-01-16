@@ -15,7 +15,7 @@
         {{else}}
             <input type="button" id="yes" value="Attending" name="rsvp_going">
             <input class="clicked" id="no" type="button" value="Not Attending" name="rsvp_going">  
-            <select name="rsvp_num" disabled aria-disabled="true">
+            <select name="rsvp_num" disabled='true' aria-disabled="true">
             {{#for maxRSVP}}
                 <option value="{{this}}" name="">{{this}}</option>
             {{/for}}
