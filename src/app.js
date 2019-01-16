@@ -231,11 +231,10 @@ app.post('/edit/:code', (req, res) => {
     let {rsvp_going, rsvp_num} = req.body;
     rsvp_going = rsvp_num ? true : false;
     
-    // todo check if submitted db is actually changing
     // fixme the redirect is not happening for some reason
     rsvpCodes.findOne({code:req.params.code}, (err, doc) => {
         if (!err) {
-            submittedRSVP.findOneAndUpdate({code:doc._id}, {numberAttending: rsvp_num || 0, editedAt: Date.now()}, (err, doc) => {
+            submittedRSVP.findOneAndUpdate({rsvpCode:doc._id}, {numberAttending: rsvp_num || 0, editedAt: Date.now()}, (err, doc) => {
                 if (!err) {
                     req.session.edited = true;                    
                     res.redirect('/submission');
