@@ -195,7 +195,6 @@ app.get('/error', (req, res) => {
 // ~~~~~~~~~~~~~   EDIT ROUTES   ~~~~~~~~~~~~~~
 
 app.get('/edit', (req, res) => {
-    
     let maxrsvp = 0;
 
     rsvpCodes.findOne({code:req.session.rsvp_code}, (err, doc) => {
@@ -204,7 +203,7 @@ app.get('/edit', (req, res) => {
 
             submittedRSVP.findOne({rsvpCode:doc._id}, (err, doc) => {
                 if (!err) {                    
-                    res.render('edit', {rsvp_code: req.session.rsvp_code, rsvp_going: doc.numberAttending > 0 ? true : false, maxRSVP: maxrsvp});    
+                    res.render('edit', {rsvp_code: req.session.rsvp_code, rsvp_going: doc.numberAttending > 0 ? true : false, maxRSVP: maxrsvp, rsvpedFor: doc.numberAttending});    
 
                 } else {
                     res.redirect('/');

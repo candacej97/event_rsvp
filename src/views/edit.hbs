@@ -6,9 +6,8 @@
             <input class="clicked" id="yes" type="button" value="Attending" name="rsvp_going">
             <input type="button" id="no" value="Not Attending" name="rsvp_going">
             <select name="rsvp_num">
-                {{!-- todo make the number that shows up first be the number of guests that were prev rsvp'ed for --}}
             {{#for maxRSVP}}
-                <option value="{{this}}" name="">{{this}}</option>
+                <option value="{{this}}" name="" {{#ifEq rsvpedFor}}{{/ifEq}}>{{this}}</option>
             {{/for}}
             </select>
 
@@ -17,7 +16,7 @@
             <input class="clicked" id="no" type="button" value="Not Attending" name="rsvp_going">  
             <select name="rsvp_num" disabled='true' aria-disabled="true">
             {{#for maxRSVP}}
-                <option value="{{this}}" name="">{{this}}</option>
+                <option value="{{this}}" name="" {{#ifEq rsvpedFor}}{{/ifEq}}>{{this}}</option>
             {{/for}}
             </select>
         {{/if}}
