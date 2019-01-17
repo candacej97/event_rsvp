@@ -244,7 +244,6 @@ app.post('/edit', (req, res) => {
 // ~~~~~~~~~~~~~   ADMIN ROUTES   ~~~~~~~~~~~~~~
 
 // add an admin user through your mongoDB instance before deployment
-
 // these routes are not meant to implement signing up a new admin, otherwise everyone could be an admin 
 
 app.get('/admin', (req, res) => {
@@ -257,7 +256,42 @@ app.get('/admin', (req, res) => {
      * feat: download a pdf (or excel) version of the data
      * 
      */
+
+
+    if (!req.session.admin) {
+        res.render('admin-login');
+    } else {
+        const allDocs = {};
+
+        rsvpCodes.find({}, (err, docs) => {
+            submittedRSVP.find({}, (err, docs) => {
+                // res.render('admin', {options: options});
+            });
+        });
+    }
+
 });
+
+// todo process the login form
+app.post('/admin', (req, res) => {
+    const {username, password} = req.body;
+    auth.login(username, password, (err) => {
+        // todo add err message to login template
+        res.render('admin-login', err);
+    }, (user) => {        
+        auth.startAuthenticatedSession(req, user, (err) => {
+            if (!err) {
+                res.redirect('/admin');
+            } else {
+                res.redirect('/');
+            }
+        });        
+    });
+});
+
+app.get('/admin/add', (req, res) => {});
+
+app.post('/admin/add', (req, res) => {});
 
 app.get('/admin/edit', (req, res) => {
     /**
@@ -267,6 +301,12 @@ app.get('/admin/edit', (req, res) => {
      * show a link to randomly generate an invitation code to each person
      * feat: delete (or archive) multiple or single amount of invitations
      */
+
+    if (!req.session.admin) {
+        res.redirect('/');
+    } else {
+        
+    }
 });
 
 app.post('/admin/edit', (req, res) => {});
