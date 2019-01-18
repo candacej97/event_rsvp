@@ -1,0 +1,21 @@
+<h1>Admin Panel</h1>
+<h4>Current RSVPs</h4>
+{{!-- <button href="/admin/add">Add Invitation</button> --}}
+<table>
+    <thead>
+        <th>Invites Sent</th>
+        <th>Attending</th>
+        <th>Not Attending</th>
+    </thead>
+    <tbody>
+        {{#each docs}}
+        <tr>
+            <td>{{this.code}}</td>
+            <td>{{this.numberAttending}}</td>
+            <td>{{this.notAttending}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+
+{{!-- todo show a button that links to editing invite list --}}

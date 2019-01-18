@@ -249,27 +249,32 @@ app.post('/edit', (req, res) => {
 app.get('/admin', (req, res) => {
     /**
      * todo
-     * 
-     * show a list of the invitations
-     * show a key of (black - invited, green - rsvp yes, red - rsvp no)
      * show a button that links to editing invite list
      * feat: download a pdf (or excel) version of the data
-     * 
      */
-
-
+/*
     if (!req.session.admin) {
         res.render('admin-login');
-    } else {
-        const allDocs = {};
-
+    } else {*/
         rsvpCodes.find({}, (err, docs) => {
-            submittedRSVP.find({}, (err, docs) => {
-                // res.render('admin', {options: options});
-            });
-        });
-    }
+            let allDocs = docs;
+            
+            for (const x of docs) {
 
+                submittedRSVP.findOne({rsvpCode:x._id}, (err, doc) => {
+                    if (doc) {
+                        x['numberAttending'] = doc.numberAttending;
+                        x['notAttending'] = x.maxRSVP - x.numberAttending;
+                    }
+                    else {
+                        x['numberAttending'] = 'N/A';
+                        x['notAttending'] = 'N/A';
+                    }
+                });
+            };
+            res.render('admin', {docs: allDocs});
+        });
+    // }
 });
 
 // todo process the login form
