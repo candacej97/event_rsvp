@@ -40,7 +40,7 @@ p {
     font-size: 1.75rem;
 }
 
-input[type="text"], input[name="rsvp_going"], input[value="Submit"], select {
+input, select {
     max-height: 125px;
     height: 50px;
     min-width: 100px;
@@ -56,8 +56,12 @@ input[name="rsvp_going"] {
     cursor: pointer;
 }
 
-input[name="rsvp_going"]:hover, input[name="rsvp_going"]:focus, input[name="rsvp_going"].clicked:hover, input[name="rsvp_going"].clicked:focus, input[value="Submit"]:hover, input[value="Submit"]:focus {
+input:hover, input:focus, input.clicked:hover, input.clicked:focus {
     background: #c05151;
+}
+
+input[type="text"]:hover, input[type="text"]:focus, input[type="password"]:hover, input[type="password"]:focus {
+    background: #E8E8E8;
 }
 
 select {
